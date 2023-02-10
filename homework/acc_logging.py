@@ -4,6 +4,7 @@ import torch.utils.tensorboard as tb
 
 
 def test_logging(train_logger, valid_logger):
+    import numpy as np
 
     """
     Your code here.
@@ -13,18 +14,27 @@ def test_logging(train_logger, valid_logger):
     Call the loss 'loss', and accuracy 'accuracy' (no slash or other namespace)
     """
 
+
     # This is a strongly simplified training loop
+    global_step = 0
     for epoch in range(10):
         torch.manual_seed(epoch)
+        train_accuracy = []
         for iteration in range(20):
             dummy_train_loss = 0.9**(epoch+iteration/20.)
             dummy_train_accuracy = epoch/10. + torch.randn(10)
-            raise NotImplementedError('Log the training loss')
-        raise NotImplementedError('Log the training accuracy')
+            train_logger.add_scalar('loss', dummy_train_loss, global_step=global_step)
+            train_accuracy.extend(dummy_train_accuracy)
+            
+            global_step +=1
+
         torch.manual_seed(epoch)
+        valid_accuracy = []
         for iteration in range(10):
             dummy_validation_accuracy = epoch / 10. + torch.randn(10)
-        raise NotImplementedError('Log the validation accuracy')
+            valid_accuracy.extend(dummy_validation_accuracy)
+        train_logger.add_scalar('accuracy', np.mean(train_accuracy), global_step=global_step)
+        valid_logger.add_scalar('accuracy', np.mean(valid_accuracy), global_step=global_step)
 
 
 if __name__ == "__main__":
@@ -36,3 +46,4 @@ if __name__ == "__main__":
     train_logger = tb.SummaryWriter(path.join(args.log_dir, 'train'))
     valid_logger = tb.SummaryWriter(path.join(args.log_dir, 'test'))
     test_logging(train_logger, valid_logger)
+
